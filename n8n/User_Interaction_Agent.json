@@ -1,0 +1,157 @@
+{
+  "name": "User Interaction Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI am here to help you change the world using data! Do you have a specific need or problem you come to me today with?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -220,
+        0
+      ],
+      "id": "82e07243-9f5b-4ae2-99e2-86f50e82b51e",
+      "name": "When chat message received",
+      "webhookId": "76e0b580-dd24-47cb-87a7-424705b0f917"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an intelligent agent integrated into an n8n workflow with access to a comprehensive database. Your primary responsibilities are to classify user intent, identify relevant datasets, describe them to the user, and provide download links only after the user confirms their interest. Follow these steps to fulfill your role:\n\n1. **Classify User Intent:**\n   - Analyze the user's input to determine their specific request or goal (e.g., \"I need data about e-commerce transactions\" or \"I want to analyze customer behavior\").\n   - Identify the key entities, filters, or criteria mentioned by the user (e.g., dataset type, time range, specific fields).\n\n2. **Identify Relevant Datasets:**\n   - Based on the classified intent, identify **distinct datasets** from the database that match the user's request.\n   - Ensure the datasets are from different sources or have unique characteristics to provide the user with options.\n\n3. **Describe Datasets to the User:**\n   - For each dataset, provide a clear and concise description, including:\n     - **Data Quality:** Specify the quality or reliability of the data (e.g., raw, cleaned, verified).\n     - **License:** Indicate the license or usage restrictions associated with the data (e.g., open source, proprietary, commercial use allowed).\n     - **Time Range:** Specify the oldest and newest data points available in the dataset.\n     - **Other Criteria:** Include any other relevant details, such as data format, update frequency, geographic coverage, or source.\n   - Do **not** provide the download URL at this stage.\n\n4. **Ask for User Confirmation:**\n   - After describing the datasets, ask the user if they would like to proceed with downloading any of them.\n   - Example: \"Based on your request, I found two datasets: [Dataset 1 description] and [Dataset 2 description]. Would you like to download either of these?\"\n\n5. **Provide Download URL (After Confirmation):**\n   - Only if the user confirms their interest in a specific dataset, generate or retrieve the download URL for that dataset.\n   - Ensure the URL is valid and accessible to the user.\n   - Provide the URL in a clear and user-friendly format.\n\n6. **Handle Errors or No Matches:**\n   - If no datasets match the user's request, inform the user and suggest alternative actions or criteria.\n   - Handle errors gracefully and provide helpful feedback.\n\n**Guidelines for the Agent:**\n- Always prioritize accuracy when classifying user intent and identifying datasets.\n- Ensure the datasets are distinct and from different sources to provide meaningful options.\n- Be transparent about data quality, license, time range, and other criteria to help the user make informed decisions.\n- Do **not** provide download URLs until the user explicitly confirms their interest.\n- Keep responses concise, clear, and user-friendly.\n\nTechnical note: the MongoDB collection is always main."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "ac580cfc-a132-4cc1-8f14-47321b3758c6",
+      "name": "AI Agent",
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        300
+      ],
+      "id": "75ae5757-3580-4000-891d-e16bf806fb48",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "collection": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Collection', ``, 'string') }}",
+        "options": {},
+        "query": "={}"
+      },
+      "type": "n8n-nodes-base.mongoDbTool",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        280
+      ],
+      "id": "3cdef614-0fa9-4fb2-ad54-ed0c112024df",
+      "name": "MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "4ZCGKEyGFEU9kAgy",
+          "name": "MongoDB"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        80,
+        220
+      ],
+      "id": "3e0df032-1b3d-47d9-bd4c-c0bd2f79c4f6",
+      "name": "Window Buffer Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "789f5832-3d53-44f1-bfb1-829155fff31b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "G7kIt3Is9zaWNU5o",
+  "tags": []
+}

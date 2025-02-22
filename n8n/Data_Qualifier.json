@@ -9,6 +9,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
+        420,
+        80
         860,
         80
       ],
@@ -107,6 +109,7 @@
         "text": "=Quality: {{ $json.output['provider_name,address1,address2,city,state,zip,public_phone,latitude,longitude,geopoint,last_report_date,is_pap,is_prescribing_svcs_available,url_appointment,home_delivery,is_icatt_site,has_usg_product,has_commercial_product,has_paxlovid,has_commercial_paxlovid,has_usg_paxlovid,has_lagevrio,has_commercial_lagevrio,has_usg_lagevrio,has_veklury,has_oseltamivir_generic,has_oseltamivir_suspension,has_oseltamivir_tamiflu,has_baloxavir,has_zanamivir,has_peramivir,grantee_code,is_flu,is_covid'] }}",
         "options": {
           "systemMessage": "=Base on input data on output give me 3 values \"category\" and \"quality\".\n\"qualiy\" types are \"bronze\",\"silver\" or \"gold\".\nSet \"quality\"  base on information from \"Completeness\", \"Accuracy\", \"Consistency\", \"Outliers\" and \"Bias\" in input.\n\"category\" base on input set this field about category"
+          "systemMessage": "=Base on input data on output give me 3 values \"category\" and \"quality\".\n\"qualiy\" types are \"bronze\",\"silver\" or \"gold\".\nSet \"quality\"  base on information from \"Completeness\", \"Accuracy\", \"Consistency\", \"Outliers\" and \"Bias\" in input.\n\"category\" base on input set this field about category"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -145,6 +148,7 @@
               "id": "ca8daf0d-6985-430a-b6f1-84478b348df1",
               "name": "date_of_insert",
               "value": "={{ $('Get current Date').item.json.currentDate }}",
+              "value": "={{ $('Get current Date').item.json.currentDate }}",
               "type": "string"
             },
             {
@@ -182,6 +186,7 @@
       "parameters": {
         "operation": "insert",
         "collection": "main",
+        "fields": "category,date_of_insert,quality,url,license",
         "fields": "category,date_of_insert,quality,url,license",
         "options": {}
       },
@@ -353,6 +358,7 @@
       "main": [
         [
           {
+            "node": "Get current Date",
             "node": "Get current Date",
             "type": "main",
             "index": 0
