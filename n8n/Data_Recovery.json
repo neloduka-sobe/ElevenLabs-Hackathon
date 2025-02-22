@@ -1,0 +1,98 @@
+{
+  "name": "Data Recovery",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -100
+      ],
+      "id": "fe6eabb3-6ba1-4c42-a09e-236f17adca2f",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "attributes": {
+          "attributes": [
+            {
+              "name": "id",
+              "description": "This is mongoDB item id used for the extraction of it",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -100
+      ],
+      "id": "78c58c8f-e7df-4349-ba32-ef13393ff3a7",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        80
+      ],
+      "id": "83e6d445-1a8e-4777-8f02-7c83460d8b60",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "eRmx5P6UaMQE3NKq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fcab97de-3677-456c-908d-3c93da2f5b2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "CmR0093cp9SvNc1V",
+  "tags": []
+}
