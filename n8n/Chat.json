@@ -4,8 +4,9 @@
     {
       "parameters": {
         "public": true,
+        "mode": "webhook",
         "options": {
-          "responseMode": "responseNode"
+          "allowedOrigins": "*"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
@@ -213,7 +214,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "e10c5df0-c903-406c-95fd-18663a65a4ca",
+  "versionId": "ec65f333-811c-4b17-80dc-5ff3705d8f06",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
