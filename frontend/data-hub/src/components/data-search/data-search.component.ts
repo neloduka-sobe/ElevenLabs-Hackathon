@@ -6,7 +6,7 @@ import { createChat } from '@n8n/chat';
   selector: 'app-data-search',
   imports: [],
     schemas: [
-      CUSTOM_ELEMENTS_SCHEMA  
+      CUSTOM_ELEMENTS_SCHEMA
     ],
   templateUrl: './data-search.component.html',
   styleUrl: './data-search.component.scss'
@@ -28,7 +28,7 @@ constructor(){
       defaultLanguage: 'en',
       initialMessages: [
       ],
-      
+
     });
   }
 }
