@@ -1,0 +1,341 @@
+{
+  "name": "Data Qualifier",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        440,
+        60
+      ],
+      "id": "1567c3b0-2bb3-4a85-b0d9-1df44daed334",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://healthdata.gov/resource/879u-23sm.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -520,
+        -120
+      ],
+      "id": "58cc343a-a03e-4b85-a93c-5b945f3d9254",
+      "name": "Get CSV"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst csvTable = items[0]?.json?.csv_table;\nconst firstLineEndIndex = csvTable.indexOf(\"\\n\");\nconst firstLine = csvTable.substring(0, firstLineEndIndex);\nconst columnNames = firstLine.split(\",\").map((name) => name.replace(/\"/g, \"\"));\n\nreturn { columnNames };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -120
+      ],
+      "id": "7340a539-3fbc-4638-9c03-3e0b80894d0e",
+      "name": "Create columns names"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0681de64-433a-46d9-86b6-388b74f3c70a",
+              "name": "csv_table",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -300,
+        -120
+      ],
+      "id": "aca957b7-c62b-4ef1-bf6d-b785735b34e3",
+      "name": "CSV"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        60,
+        80
+      ],
+      "id": "62c3ac78-6a4a-4916-b205-2ca3ed42ecc0",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $('CSV').item.json.csv_table }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "={{ $json.columnNames }}",
+              "description": "columns names to check rows"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "=You are an expert extraction algorithm.\nBase on input CSV string and knowing about  columns: {{ $json.columnNames }} on output information about \n\"completeness\", \"accuracy\", \"consistency\", \"outliers\", \"bias\",\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        60,
+        -120
+      ],
+      "id": "ba59e7cf-45c0-429d-8427-bd61724cfb26",
+      "name": "Classify Data"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        -120
+      ],
+      "id": "1293c873-2843-4e40-aea7-8be8fb2dd257",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Quality: {{ $json.output['provider_name,address1,address2,city,state,zip,public_phone,latitude,longitude,geopoint,last_report_date,is_pap,is_prescribing_svcs_available,url_appointment,home_delivery,is_icatt_site,has_usg_product,has_commercial_product,has_paxlovid,has_commercial_paxlovid,has_usg_paxlovid,has_lagevrio,has_commercial_lagevrio,has_usg_lagevrio,has_veklury,has_oseltamivir_generic,has_oseltamivir_suspension,has_oseltamivir_tamiflu,has_baloxavir,has_zanamivir,has_peramivir,grantee_code,is_flu,is_covid'] }}",
+        "options": {
+          "systemMessage": "=Base on input data on output give me 3 values \"category\",\"date_of_insert\" and \"quality\".\n\"qualiy\" types are \"bronze\",\"silver\" or \"gold\".\nSet \"quality\"  base on information from \"Completeness\", \"Accuracy\", \"Consistency\", \"Outliers\" and \"Bias\" in input.\n\"date_of_insert\" current date.\n\"category\" base on input set this field about category"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        -120
+      ],
+      "id": "c1cfdb41-dd6f-4d16-8a87-bfec0938ff59",
+      "name": "Get Quality of file"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawData = $input.first().json.output;\nconst cleanedData = rawData.replace(\"```json\\n\", \"\").replace(\"\\n```\", \"\");\nconst jsonData = JSON.parse(cleanedData);\n\nreturn {\n  category: jsonData.category,\n  date_of_insert: jsonData.date_of_insert,\n  quality: jsonData.quality,\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -120
+      ],
+      "id": "eafc617c-1909-4a69-b7da-f2aa2881b1f0",
+      "name": "Map values of Quality"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9623f421-12f0-48a8-8778-08310876e9bf",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "ca8daf0d-6985-430a-b6f1-84478b348df1",
+              "name": "date_of_insert",
+              "value": "={{ $json.date_of_insert }}",
+              "type": "string"
+            },
+            {
+              "id": "b6cae9d8-1f26-4026-b26f-e2d8297297e0",
+              "name": "quality",
+              "value": "={{ $json.quality }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1020,
+        -120
+      ],
+      "id": "2eaac495-b637-481e-8206-212ea4168af1",
+      "name": "Set valuesv for send"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "main",
+        "fields": "category,date_of_insert,quality",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        1240,
+        -120
+      ],
+      "id": "b82fde90-0922-484a-b4d9-ad63cc018935",
+      "name": "Send data",
+      "credentials": {
+        "mongoDb": {
+          "id": "4ZCGKEyGFEU9kAgy",
+          "name": "MongoDB"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Get Quality of file",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get CSV": {
+      "main": [
+        [
+          {
+            "node": "CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create columns names": {
+      "main": [
+        [
+          {
+            "node": "Classify Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV": {
+      "main": [
+        [
+          {
+            "node": "Create columns names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Classify Data",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Data": {
+      "main": [
+        [
+          {
+            "node": "Get Quality of file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Quality of file": {
+      "main": [
+        [
+          {
+            "node": "Map values of Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map values of Quality": {
+      "main": [
+        [
+          {
+            "node": "Set valuesv for send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set valuesv for send": {
+      "main": [
+        [
+          {
+            "node": "Send data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d7cdcdb3-f3bb-4421-a547-b2171710a602",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "kFfiIbGNN7kqLe3Z",
+  "tags": []
+}
