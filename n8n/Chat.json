@@ -1,0 +1,224 @@
+{
+  "name": "Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -280,
+        0
+      ],
+      "id": "068c77d5-8db2-4103-8d25-c86550a5e107",
+      "name": "When chat message received",
+      "webhookId": "c62a62b5-e105-4426-a5ec-e8b1b6c26ab9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant.\nFirst you want to ask how can you help.\nYour role is to assist you for exporting his data to us.\n\nYour role is to get from user this informations:\n1. URL where the data is.\n2. License of this data.\n\nIf you have got all data use Tool\n\nYou have to ask user questions about that information.\n\nIf you get all reuired informations use tool \"Call_Classify_Data\".\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        180,
+        0
+      ],
+      "id": "4eb9a61c-f6cb-44a2-b056-fab12326d8a8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        20,
+        200
+      ],
+      "id": "6ab6909e-3f05-422b-b308-4f21e247d50d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        200
+      ],
+      "id": "13b933e3-e59f-4bfa-8b31-346bdf1e8e29",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "03c7732a-e78e-4374-be16-f7b2ee1ec6cf",
+              "name": "session_id",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "dbdca312-a4ec-4ce2-88ed-57fe26533874",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "name": "Call_Classify_Data",
+        "workflowId": {
+          "__rl": true,
+          "value": "kFfiIbGNN7kqLe3Z",
+          "mode": "list",
+          "cachedResultName": "Data Qualifier"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('url', ``, 'string') }}",
+            "license": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('license', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "license",
+              "displayName": "license",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        320,
+        220
+      ],
+      "id": "6f19ee25-80b1-4519-a657-f77f6a32c941",
+      "name": "Call_Classify_Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call_Classify_Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec65f333-811c-4b17-80dc-5ff3705d8f06",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "MIOe385NMLTN2zSC",
+  "tags": []
+}
