@@ -1,0 +1,194 @@
+{
+  "name": "Data Recovery",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -100
+      ],
+      "id": "fe6eabb3-6ba1-4c42-a09e-236f17adca2f",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "attributes": {
+          "attributes": [
+            {
+              "name": "_id",
+              "description": "This is mongoDB item id used for the extraction of it",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        -100
+      ],
+      "id": "78c58c8f-e7df-4349-ba32-ef13393ff3a7",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        80
+      ],
+      "id": "83e6d445-1a8e-4777-8f02-7c83460d8b60",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "eRmx5P6UaMQE3NKq",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0e07d90a-a8d3-4825-9f1e-29b340016d29",
+              "name": "url",
+              "value": "$in",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        -100
+      ],
+      "id": "0b554af7-a934-4c82-9d25-24b77575a21d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "collection": "main",
+        "options": {},
+        "query": "{\n  \"_id\": { \"$in\": \"{{$node['Function Node'].json.datasetIds}}\" }\n}"
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        280,
+        -100
+      ],
+      "id": "0b6b1525-e8af-44ad-8af8-93ee9705b309",
+      "name": "MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "KA6kTswDHF1NlTWo",
+          "name": "MongoDB account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const datasets = $input.all()[0].json;\n\nconst downloadUrls = datasets.map(dataset => ({\n  title: dataset.metadata.title,\n  url: dataset.download_info.download_url\n}));\n\nreturn { downloadUrls };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        -100
+      ],
+      "id": "82d9bc68-eb4c-4c66-bf01-9ca2db8d018b",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "MongoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MongoDB": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d8ad15a3-494f-4e9f-ac64-da251eb63298",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "CmR0093cp9SvNc1V",
+  "tags": []
+}
