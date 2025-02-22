@@ -1,14 +1,83 @@
 {
   "name": "Data Qualifier",
-  "nodes": [],
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        -20
+      ],
+      "id": "1293c873-2843-4e40-aea7-8be8fb2dd257",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -120,
+        -20
+      ],
+      "id": "58cc343a-a03e-4b85-a93c-5b945f3d9254",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        100,
+        -20
+      ],
+      "id": "234d18a7-9abf-4e99-94b5-4148ddd338c3",
+      "name": "MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "4ZCGKEyGFEU9kAgy",
+          "name": "MongoDB"
+        }
+      }
+    }
+  ],
   "pinData": {},
-  "connections": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "MongoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "8c4876ee-27c7-4a97-8e53-36e1a95d609d",
+  "versionId": "a35f3bfd-4ce2-46fe-bdf8-ac47bf3f8d83",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
   },
   "id": "kFfiIbGNN7kqLe3Z",
