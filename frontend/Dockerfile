@@ -5,16 +5,16 @@ FROM node:22
 WORKDIR /app
 
 # Copy the package.json and package-lock.json files
-COPY ./frontend/data-hub/package*.json ./
+COPY ./data-hub/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application code
-COPY ./frontend/data-hub .
+COPY ./data-hub .
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 4200
 
 # Define the command to run the app
 CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200"]
