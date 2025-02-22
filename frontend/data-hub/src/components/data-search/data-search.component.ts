@@ -3,19 +3,18 @@ import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-data-search',
   imports: [],
-  templateUrl: './chat.component.html',
-  schemas: [
-    CUSTOM_ELEMENTS_SCHEMA  
-  ],
-  styleUrl: './chat.component.scss'
+    schemas: [
+      CUSTOM_ELEMENTS_SCHEMA  
+    ],
+  templateUrl: './data-search.component.html',
+  styleUrl: './data-search.component.scss'
 })
-export class ChatComponent {
-
-  constructor(){
+export class DataSearchComponent {
+constructor(){
     createChat({
-      webhookUrl: 'https://cezpolsl.app.n8n.cloud/webhook/9e6cf716-0089-49fa-a268-7c97e4daa454/chat',
+      webhookUrl: 'https://elevenlabshackathon.app.n8n.cloud/webhook/e9df56ab-7374-4c45-92a0-4114994d1b5a/chat',
       webhookConfig: {
         method: 'POST',
         headers: {}
@@ -28,10 +27,8 @@ export class ChatComponent {
       showWelcomeScreen: false,
       defaultLanguage: 'en',
       initialMessages: [
-       "HI"
       ],
       
     });
   }
-
 }
