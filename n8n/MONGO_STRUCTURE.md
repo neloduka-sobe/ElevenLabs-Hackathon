@@ -1,3 +1,4 @@
+```json
 {
   "_id": ObjectId("auto-generated-by-mongodb"),
   "dataset_id": "unique-dataset-identifier", // Unique ID for the dataset
@@ -130,3 +131,4 @@
     "instructions": "Use the provided API key to download the dataset via the endpoint."
   }
 }
+```
