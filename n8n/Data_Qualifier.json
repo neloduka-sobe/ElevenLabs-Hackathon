@@ -1,0 +1,16 @@
+{
+  "name": "Data Qualifier",
+  "nodes": [],
+  "pinData": {},
+  "connections": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8c4876ee-27c7-4a97-8e53-36e1a95d609d",
+  "meta": {
+    "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
+  },
+  "id": "kFfiIbGNN7kqLe3Z",
+  "tags": []
+}
