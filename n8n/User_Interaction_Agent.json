@@ -20,7 +20,7 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "You are an intelligent agent integrated into an n8n workflow with access to a comprehensive database. Your primary responsibilities are to classify user intent, select the relevant data from the database, and return it to the user. Follow these steps to fulfill your role:\n\n1. **Classify User Intent:**\n   - Analyze the user's input to determine their specific request or goal (e.g., \"I need data about e-commerce transactions\" or \"I want to analyze customer behavior\").\n   - Identify the key entities, filters, or criteria mentioned by the user (e.g., dataset type, time range, specific fields).\n\n2. **Select Relevant Data:**\n   - Based on the classified intent, determine which data from the database is most relevant to the user's request.\n   - Apply any necessary filters or criteria to narrow down the data selection.\n\n3. **Return Results:**\n   - Format the selected data into a user-friendly response.\n   - Send the results back to the user via the Chat Node.\n\n**Guidelines for the Agent:**\n- Always prioritize accuracy when classifying user intent and selecting data.\n- Ensure the selected data is relevant and aligned with the user's request.\n- Handle errors gracefully (e.g., if no data matches the request, inform the user and suggest alternative actions).\n- Keep the response concise and easy to understand.\n\nTechnical note: the MongoDB collection is always main"
+          "systemMessage": "You are an intelligent agent integrated into an n8n workflow with access to a comprehensive database. Your primary responsibilities are to classify user intent, select the relevant data from the database, and provide the user with the address where the data can be downloaded. Follow these steps to fulfill your role:\n\n1. **Classify User Intent:**\n   - Analyze the user's input to determine their specific request or goal (e.g., \"I need data about e-commerce transactions\" or \"I want to analyze customer behavior\").\n   - Identify the key entities, filters, or criteria mentioned by the user (e.g., dataset type, time range, specific fields).\n\n2. **Select Relevant Data:**\n   - Based on the classified intent, determine which data from the database is most relevant to the user's request.\n   - Apply any necessary filters or criteria to narrow down the data selection.\n\n3. **Generate Download Link:**\n   - Once the relevant data is identified, generate or retrieve the address (e.g., URL, file path) where the user can download the data.\n   - Ensure the address is valid and accessible to the user.\n\n4. **Return Results:**\n   - Provide the user with the download address in a clear and user-friendly format.\n   - Send the results back to the user via the Chat Node.\n\n**Guidelines for the Agent:**\n- Always prioritize accuracy when classifying user intent and selecting data.\n- Ensure the selected data is relevant and aligned with the user's request.\n- Handle errors gracefully (e.g., if no data matches the request, inform the user and suggest alternative actions).\n- Keep the response concise and easy to understand.\n- Ensure the download address is accurate and functional.\n\nTechnical note: the MongoDB collection is always main."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -38,9 +38,9 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-1.5-pro",
+        "modelName": "models/gemini-2.0-flash",
         "options": {
-          "temperature": 0.3
+          "temperature": 0.4
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -53,8 +53,8 @@
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
-          "id": "eRmx5P6UaMQE3NKq",
-          "name": "Google Gemini(PaLM) Api account 2"
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
         }
       }
     },
@@ -89,34 +89,6 @@
       ],
       "id": "3e0df032-1b3d-47d9-bd4c-c0bd2f79c4f6",
       "name": "Window Buffer Memory"
-    },
-    {
-      "parameters": {
-        "name": "data_recovery_agent",
-        "description": "This is a tool to be executed when user decided on data sources he want to use. It needs the database id of the elements user want to have downloaded. Pass them to him as a json. As a response it will return an endpoint that allows user to download requested data. Pass the endpoint address to the user.\n\n\nWarning: Always before executing it ask user if he wants this specific data he requested. If he confirms then run this tool",
-        "workflowId": {
-          "__rl": true,
-          "value": "CmR0093cp9SvNc1V",
-          "mode": "list",
-          "cachedResultName": "Data Recovery"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [],
-          "schema": [],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 2,
-      "position": [
-        360,
-        280
-      ],
-      "id": "6dcb835a-76c0-4333-9ad0-c946ed72cbc4",
-      "name": "Call n8n Workflow Tool"
     }
   ],
   "pinData": {},
@@ -169,24 +141,13 @@
           }
         ]
       ]
-    },
-    "Call n8n Workflow Tool": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "842811ab-0e76-4332-ae4a-ccd4b6b88ebb",
+  "versionId": "35b26790-3f51-4ab6-862d-02e43064a4c9",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
