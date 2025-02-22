@@ -6,44 +6,96 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -340,
-        -20
+        -860,
+        -40
       ],
       "id": "1293c873-2843-4e40-aea7-8be8fb2dd257",
       "name": "When clicking ‘Test workflow’"
     },
     {
       "parameters": {
+        "promptType": "define",
+        "text": "=Base on {{ $json.csv_table }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        60,
+        -60
+      ],
+      "id": "c1cfdb41-dd6f-4d16-8a87-bfec0938ff59",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        180
+      ],
+      "id": "1567c3b0-2bb3-4a85-b0d9-1df44daed334",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "30EHAa85g4eQMD1d",
+          "name": "Google Gemini(PaLM) Api "
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://healthdata.gov/resource/879u-23sm.csv",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -120,
-        -20
+        -640,
+        -40
       ],
       "id": "58cc343a-a03e-4b85-a93c-5b945f3d9254",
-      "name": "HTTP Request"
+      "name": "Get CSV"
     },
     {
       "parameters": {
-        "operation": "insert",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0681de64-433a-46d9-86b6-388b74f3c70a",
+              "name": "csv_table",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
         "options": {}
       },
-      "type": "n8n-nodes-base.mongoDb",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        100,
-        -20
+        -420,
+        -40
       ],
-      "id": "234d18a7-9abf-4e99-94b5-4148ddd338c3",
-      "name": "MongoDB",
-      "credentials": {
-        "mongoDb": {
-          "id": "4ZCGKEyGFEU9kAgy",
-          "name": "MongoDB"
-        }
-      }
+      "id": "aca957b7-c62b-4ef1-bf6d-b785735b34e3",
+      "name": "Name data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst csvTable = items[0]?.json?.csv_table;\nconst firstLineEndIndex = csvTable.indexOf(\"\\n\");\nconst firstLine = csvTable.substring(0, firstLineEndIndex);\nconst columnNames = firstLine.split(\",\").map((name) => name.replace(/\"/g, \"\"));\n\nreturn { columnNames };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -40
+      ],
+      "id": "7340a539-3fbc-4638-9c03-3e0b80894d0e",
+      "name": "Create columns names"
     }
   ],
   "pinData": {},
@@ -52,18 +104,51 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Get CSV",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "HTTP Request": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get CSV": {
       "main": [
         [
           {
-            "node": "MongoDB",
+            "node": "Name data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Name data": {
+      "main": [
+        [
+          {
+            "node": "Create columns names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create columns names": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
             "type": "main",
             "index": 0
           }
@@ -75,7 +160,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a35f3bfd-4ce2-46fe-bdf8-ac47bf3f8d83",
+  "versionId": "1c790473-86e4-49b0-86b3-45177b81cd5d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
