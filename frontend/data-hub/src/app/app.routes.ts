@@ -1,4 +1,4 @@
 import { Routes } from '@angular/router';
-import { DataSearchComponent } from '../components/data-search/data-search.component';
+import { ChatComponent } from '../components/chat/chat.component';
 
-export const routes: Routes = [{ path: '', component: DataSearchComponent }, ];
+export const routes: Routes = [{ path: '', component: ChatComponent }, ];
