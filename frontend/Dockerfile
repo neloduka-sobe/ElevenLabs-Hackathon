@@ -5,13 +5,13 @@ FROM node:22
 WORKDIR /app
 
 # Copy the package.json and package-lock.json files
-COPY ./frontend/package*.json ./
+COPY ./frontend/data-hub/package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy the rest of the application code
-COPY ./frontend/ .
+COPY ./frontend/data-hub .
 
 # Expose the port the app runs on
 EXPOSE 3000
