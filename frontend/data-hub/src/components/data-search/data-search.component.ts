@@ -14,7 +14,7 @@ import { createChat } from '@n8n/chat';
 export class DataSearchComponent {
 constructor(){
     createChat({
-      webhookUrl: 'https://elevenlabshackathon.app.n8n.cloud/webhook/e9df56ab-7374-4c45-92a0-4114994d1b5a/chat',
+      webhookUrl: 'https://elevenlabshackathon.app.n8n.cloud/webhook/76e0b580-dd24-47cb-87a7-424705b0f917/chat',
       webhookConfig: {
         method: 'POST',
         headers: {}
