@@ -4,8 +4,10 @@
     {
       "parameters": {
         "public": true,
-        "initialMessages": "Hi there! 👋\nI am here to help you change the world using data! Do you have a specific need or problem you come to me today with?",
-        "options": {}
+        "mode": "webhook",
+        "options": {
+          "allowedOrigins": "*"
+        }
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
@@ -147,7 +149,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "789f5832-3d53-44f1-bfb1-829155fff31b",
+  "versionId": "e6bb5a43-9018-4252-9cde-364fef29ae2a",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c5ae296890d47f5efa8bbbb6a43c2f0959c8b12564819d2a45be51e28a0d178c"
