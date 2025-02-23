@@ -1,32 +1,124 @@
 from fastapi import FastAPI, HTTPException
-from pymongo import MongoClient
+from pydantic import BaseModel, HttpUrl
+from typing import List
+import pandas as pd
+import pymongo
+from bson import ObjectId
+import os
+from urllib.parse import urljoin
 
+# Initialize FastAPI app
 app = FastAPI()
 
-def test_mongodb_connection(uri="mongodb://localhost:27017/"):
+# Configure MongoDB connection
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+client = pymongo.MongoClient(MONGO_URI)
+db = client.datasources_db
+collection = db.merged_data
+
+# Pydantic model for request validation
+class DataSourceRequest(BaseModel):
+    urls: List[HttpUrl]
+
+# Helper function to fetch and merge dataframes
+async def fetch_and_merge_data(urls: List[HttpUrl]) -> pd.DataFrame:
+    dataframes = []
+    
+    for url in urls:
+        try:
+            # Read data from URL - assuming CSV format
+            # You might want to add more file format support based on your needs
+            df = pd.read_csv(str(url))
+            dataframes.append(df)
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Failed to fetch data from {url}: {str(e)}"
+            )
+    
+    if not dataframes:
+        raise HTTPException(
+            status_code=400,
+            detail="No valid data sources provided"
+        )
+    
+    # Merge all dataframes
+    # You might want to customize the merge strategy based on your needs
+    merged_df = pd.concat(dataframes, ignore_index=True)
+    return merged_df
+
+@app.post("/merge", response_model=dict)
+async def merge_datasources(request: DataSourceRequest):
     try:
-        # Attempt to connect to the MongoDB server
-        client = MongoClient(uri)
+        # Fetch and merge data
+        merged_df = await fetch_and_merge_data(request.urls)
         
-        # List all databases to confirm connection
-        databases = client.list_database_names()
+        # Convert DataFrame to dictionary for MongoDB storage
+        data_dict = merged_df.to_dict(orient='records')
         
-        print("Connection successful!")
-        print("Databases available:", databases)
+        # Store in MongoDB
+        result = collection.insert_one({
+            "data": data_dict,
+            "source_urls": [str(url) for url in request.urls],
+            "timestamp": pd.Timestamp.now()
+        })
         
-        # Close the connection
-        client.close()
+        # Construct the URL for accessing the merged data
+        base_url = os.getenv("BASE_URL", "http://0.0.0.0:8000")
+        access_url = urljoin(base_url, f"/serve/{result.inserted_id}")
         
-        return {"status": "success", "databases": databases}
+        return {
+            "message": "Data sources merged successfully",
+            "database_id": str(result.inserted_id),
+            "access_url": access_url
+        }
+        
     except Exception as e:
-        print("Connection failed:", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process data sources: {str(e)}"
+        )
 
-@app.get("/test-mongodb")
-async def test_mongodb_endpoint(uri: str = "mongodb+srv://nelodukasobe:wIeNcOyxtcP2MHyx@main.b6bhe.mongodb.net/?retryWrites=true&w=majority&appName=main"):
-    result = test_mongodb_connection(uri)
-    return result
+@app.get("/serve/{database_id}")
+async def serve_data(database_id: str):
+    try:
+        # Validate ObjectId
+        if not ObjectId.is_valid(database_id):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid database ID"
+            )
+            
+        # Fetch data from MongoDB
+        result = collection.find_one({"_id": ObjectId(database_id)})
+        
+        if not result:
+            raise HTTPException(
+                status_code=404,
+                detail="Database ID not found"
+            )
+            
+        return {
+            "data": result["data"],
+            "source_urls": result["source_urls"],
+            "timestamp": result["timestamp"]
+        }
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to retrieve data: {str(e)}"
+        )
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Startup event to ensure MongoDB connection
+@app.on_event("startup")
+async def startup_event():
+    try:
+        # Ping MongoDB
+        client.admin.command('ping')
+        print("Successfully connected to MongoDB")
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {str(e)}")
+        raise

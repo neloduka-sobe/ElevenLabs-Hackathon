@@ -3,3 +3,4 @@ uvicorn
 pydantic
 pydantic-ai
 pymongo[srv]
+pandas
