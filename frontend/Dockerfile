@@ -10,6 +10,8 @@ COPY ./data-hub/package*.json ./
 # Install dependencies
 RUN npm install
 
+RUN npm install @n8n/chat
+
 # Copy the rest of the application code
 COPY ./data-hub .
 
@@ -17,4 +19,4 @@ COPY ./data-hub .
 EXPOSE 4200
 
 # Define the command to run the app
-CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200"]
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "4200", "--disable-host-check"]

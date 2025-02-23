@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 app = FastAPI()
 
 # Configure MongoDB connection
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://nelodukasobe:wIeNcOyxtcP2MHyx@main.b6bhe.mongodb.net/?retryWrites=true&w=majority&appName=main")
 client = pymongo.MongoClient(MONGO_URI)
 db = client.datasources_db
 collection = db.merged_data
